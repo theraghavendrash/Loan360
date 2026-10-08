@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Borrower Dashboard - Loan 360</title>
+  <!-- Bootstrap 5 CDN -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Bootstrap Icons CDN -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <!-- Google Fonts Inter -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="bg-light d-flex flex-column min-vh-100">
+
+  <!-- Top Navbar -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top py-2">
+    <div class="container">
+      <a class="navbar-brand" href="customer.html">
+        <span class="brand-icon"><i class="bi bi-bank2"></i></span>
+        <span>Loan 360 <small class="text-secondary fw-normal fs-6">| Borrower Portal</small></span>
+      </a>
+
+      <div class="d-flex align-items-center gap-3">
+        <div class="text-light d-none d-sm-block text-end">
+          <div class="fw-semibold small" id="customerNameNav">Borrower</div>
+          <span class="badge bg-primary text-light small">Borrower</span>
+        </div>
+        <button id="logoutBtn" class="btn btn-outline-light btn-sm">
+          <i class="bi bi-box-arrow-right me-1"></i> Logout
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Page Content -->
+  <div class="container py-4 flex-grow-1">
+
+    <!-- Notification Toast / Alert -->
+    <div id="pageAlert" class="alert d-none" role="alert"></div>
+
+    <!-- Navigation Tabs for Borrower Features -->
+    <ul class="nav nav-tabs mb-4" id="customerTab" role="tablist">
+      <li class="nav-item" role="presentation">
+        <button class="nav-link active fw-medium" id="my-loans-tab" data-bs-toggle="tab" data-bs-target="#my-loans-pane" type="button" role="tab">
+          <i class="bi bi-card-checklist me-1"></i> My Loans & Repayments
+        </button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link fw-medium" id="apply-tab" data-bs-toggle="tab" data-bs-target="#apply-pane" type="button" role="tab">
+          <i class="bi bi-plus-circle me-1"></i> Apply For Loan
+        </button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link fw-medium" id="profile-tab" data-bs-toggle="tab" data-bs-target="#profile-pane" type="button" role="tab">
+          <i class="bi bi-person-lines-fill me-1"></i> My Profile
+        </button>
+      </li>
+    </ul>
+
+    <!-- Tab Content -->
+    <div class="tab-content" id="customerTabContent">
+
+      <!-- 1. MY LOANS & REPAYMENTS SCHEDULE -->
+      <div class="tab-pane fade show active" id="my-loans-pane" role="tabpanel">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h4 class="fw-bold mb-0">My Loan Applications</h4>
+          <button class="btn btn-sm btn-outline-secondary" onclick="loadLoansList()">
+            <i class="bi bi-arrow-clockwise me-1"></i> Refresh
+          </button>
+        </div>
+
+        <!-- Loans Container -->
+        <div id="loansListContainer" class="row g-4">
+          <div class="col-12 text-center py-5 text-muted">
+            <span class="spinner-border spinner-border-sm me-2"></span> Loading your applications...
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. APPLY FOR LOAN TAB -->
+      <div class="tab-pane fade" id="apply-pane" role="tabpanel">
+        <div class="row g-4">
+          <div class="col-12 col-lg-7">
+            <div class="card card-custom p-4">
+              <h5 class="fw-bold mb-3"><i class="bi bi-file-earmark-plus text-primary me-2"></i>New Loan Application</h5>
+              <p class="text-muted small">
+                Apply for a personal or business loan with a transparent <strong>fixed 10% annual interest rate</strong>.
+              </p>
+
+              <form id="loanForm">
+                <div class="mb-3">
+                  <label for="loanAmount" class="form-label fw-medium">Loan Amount (₹)</label>
+                  <div class="input-group">
+                    <span class="input-group-text">₹</span>
+                    <input type="number" class="form-control" id="loanAmount" placeholder="e.g. 100000" min="10000" max="2500000" step="5000" required>
+                  </div>
+                  <div class="form-text">Minimum ₹10,000, Maximum ₹25,00,000</div>
+                </div>
+
+                <div class="mb-3">
+                  <label for="loanTenure" class="form-label fw-medium">Tenure (Months)</label>
+                  <select class="form-select" id="loanTenure" required>
+                    <option value="6">6 Months</option>
+                    <option value="12" selected>12 Months (1 Year)</option>
+                    <option value="24">24 Months (2 Years)</option>
+                    <option value="36">36 Months (3 Years)</option>
+                    <option value="48">48 Months (4 Years)</option>
+                    <option value="60">60 Months (5 Years)</option>
+                  </select>
+                </div>
+
+                <div class="mb-4">
+                  <label for="loanPurpose" class="form-label fw-medium">Loan Purpose</label>
+                  <textarea class="form-control" id="loanPurpose" rows="3" placeholder="e.g., Home renovation, medical emergency, business expansion, education..." required></textarea>
+                </div>
+
+                <button type="submit" id="submitLoanBtn" class="btn btn-primary w-100 py-2">
+                  <span id="loanSubmitSpinner" class="spinner-border spinner-border-sm me-2 d-none"></span>
+                  Submit Loan Application
+                </button>
+              </form>
+            </div>
+          </div>
+
+          <!-- Live EMI Preview Column -->
+          <div class="col-12 col-lg-5">
+            <div class="emi-preview-box shadow-sm mb-3">
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <span class="text-uppercase small tracking-wider opacity-75">Estimated Monthly EMI</span>
+                <span class="badge bg-light text-primary fw-semibold">10% Fixed APR</span>
+              </div>
+              <div class="emi-amount-display" id="previewEMI">₹0.00</div>
+              <p class="small opacity-75 mb-4">Calculated based on standard reducing balance amortization formula.</p>
+
+              <hr class="opacity-25 my-3">
+
+              <div class="d-flex justify-content-between mb-2">
+                <span class="opacity-75">Total Interest:</span>
+                <span class="fw-semibold" id="previewInterest">₹0.00</span>
+              </div>
+              <div class="d-flex justify-content-between">
+                <span class="opacity-75">Total Payable Amount:</span>
+                <span class="fw-semibold fs-5" id="previewTotal">₹0.00</span>
+              </div>
+            </div>
+
+            <div class="card card-custom p-3 bg-white">
+              <h6 class="fw-bold mb-2"><i class="bi bi-shield-check text-success me-1"></i> Transparent Lending</h6>
+              <ul class="text-muted small ps-3 mb-0">
+                <li>Fixed interest rate of 10% per annum applied across all tenures.</li>
+                <li>Applications are reviewed promptly by our loan officers.</li>
+                <li>Upon approval, your monthly EMI repayment schedule activates automatically.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3. BORROWER PROFILE TAB -->
+      <div class="tab-pane fade" id="profile-pane" role="tabpanel">
+        <div class="row justify-content-center">
+          <div class="col-12 col-md-8 col-lg-6">
+            <div class="card card-custom p-4">
+              <div class="d-flex align-items-center gap-3 mb-4">
+                <div class="bg-primary text-white rounded-circle p-3 d-flex align-items-center justify-content-center" style="width: 55px; height: 55px;">
+                  <i class="bi bi-person-fill fs-3"></i>
+                </div>
+                <div>
+                  <h5 class="fw-bold mb-0" id="customerNameDisplay">Borrower Profile</h5>
+                  <small class="text-muted" id="customerEmailDisplay">borrower@example.com</small>
+                </div>
+              </div>
+
+              <form id="profileForm">
+                <div class="mb-3">
+                  <label for="profilePhone" class="form-label fw-medium">Phone Number</label>
+                  <div class="input-group">
+                    <span class="input-group-text"><i class="bi bi-telephone"></i></span>
+                    <input type="tel" class="form-control" id="profilePhone" placeholder="+91 98765 43210" required>
+                  </div>
+                </div>
+
+                <div class="mb-3">
+                  <label for="profileAddress" class="form-label fw-medium">Residential Address</label>
+                  <div class="input-group">
+                    <span class="input-group-text"><i class="bi bi-geo-alt"></i></span>
+                    <textarea class="form-control" id="profileAddress" rows="2" placeholder="Flat / House No, Street, City, State, PIN" required></textarea>
+                  </div>
+                </div>
+
+                <div class="mb-3">
+                  <label for="profileIncome" class="form-label fw-medium">Monthly Income (₹)</label>
+                  <div class="input-group">
+                    <span class="input-group-text">₹</span>
+                    <input type="number" class="form-control" id="profileIncome" placeholder="e.g. 60000" min="0" step="1000" required>
+                  </div>
+                </div>
+
+                <div class="mb-4">
+                  <label for="profileEmployment" class="form-label fw-medium">Employment Status</label>
+                  <select class="form-select" id="profileEmployment" required>
+                    <option value="Salaried (Private / MNC)">Salaried (Private / MNC)</option>
+                    <option value="Government / PSU Employee">Government / PSU Employee</option>
+                    <option value="Self-Employed / Business Owner">Self-Employed / Business Owner</option>
+                    <option value="Freelancer / Professional">Freelancer / Professional</option>
+                    <option value="Retired">Retired</option>
+                  </select>
+                </div>
+
+                <button type="submit" id="saveProfileBtn" class="btn btn-primary w-100 py-2">
+                  <span id="profileSpinner" class="spinner-border spinner-border-sm me-2 d-none"></span>
+                  Save Profile Details
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Repayment Schedule Modal -->
+  <div class="modal fade" id="scheduleModal" tabindex="-1" aria-labelledby="scheduleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="scheduleModalLabel">
+            <i class="bi bi-calendar3 me-2"></i> EMI Repayment Schedule
+          </h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body p-0">
+          <div class="p-3 bg-light border-bottom d-flex justify-content-between flex-wrap gap-2">
+            <div>
+              <small class="text-muted d-block">Loan ID</small>
+              <span class="font-monospace small fw-semibold" id="modalLoanId">-</span>
+            </div>
+            <div>
+              <small class="text-muted d-block">Monthly EMI</small>
+              <span class="fw-bold text-primary" id="modalMonthlyEmi">₹0.00</span>
+            </div>
+            <div>
+              <small class="text-muted d-block">Total Payable</small>
+              <span class="fw-bold" id="modalTotalPayable">₹0.00</span>
+            </div>
+          </div>
+
+          <div class="table-responsive">
+            <table class="table align-middle mb-0">
+              <thead>
+                <tr>
+                  <th class="ps-3">#</th>
+                  <th>Due Date</th>
+                  <th>Amount</th>
+                  <th>Status</th>
+                  <th class="text-end pe-3">Action</th>
+                </tr>
+              </thead>
+              <tbody id="scheduleTableBody">
+                <!-- Rendered dynamically -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="mt-auto py-3 text-center text-muted small border-top bg-white">
+    <span>Loan 360 &copy; 2026. All rights reserved.</span>
+  </footer>
+
+  <!-- Supabase JS CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <!-- Bootstrap 5 JS Bundle CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+  <!-- Application Logic -->
+  <script src="js/supabaseClient.js"></script>
+  <script src="js/emiCalculator.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/customer.js"></script>
+
+  <script>
+    let activeCustomer = null;
+    let scheduleModalInstance = null;
+
+    /**
+     * Shows a banner notification on top of the borrower portal.
+     * @param {string} msg - Message to display
+     * @param {string} type - Bootstrap alert type ('success', 'danger', 'info')
+     */
+    function showNotification(msg, type = 'success') {
+      const el = document.getElementById('pageAlert');
+      el.className = `alert alert-${type} alert-dismissible fade show`;
+      el.innerHTML = `${msg} <button type="button" class="btn-close" data-bs-dismiss="alert"></button>`;
+      el.classList.remove('d-none');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    /**
+     * Initializes borrower portal, verifies auth session and loads user details.
+     */
+    async function initCustomerPortal() {
+      scheduleModalInstance = new bootstrap.Modal(document.getElementById('scheduleModal'));
+      const authData = await requireAuth('customer');
+      if (!authData) return;
+
+      activeCustomer = authData.user;
+      document.getElementById('customerNameNav').textContent = authData.profile?.full_name || 'Borrower';
+      document.getElementById('customerEmailDisplay').textContent = activeCustomer.email;
+
+      // Load profile info & loans list
+      await loadCustomerProfile(activeCustomer.id);
+      await loadLoansList();
+
+      // Setup Live EMI preview listeners
+      document.getElementById('loanAmount').addEventListener('input', updateLiveEMIPreview);
+      document.getElementById('loanTenure').addEventListener('change', updateLiveEMIPreview);
+      updateLiveEMIPreview();
+    }
+
+    /**
+     * Fetches and renders the borrower's loan applications cards in Indian Rupee format.
+     */
+    async function loadLoansList() {
+      const container = document.getElementById('loansListContainer');
+      container.innerHTML = '<div class="col-12 text-center py-4 text-muted"><span class="spinner-border spinner-border-sm me-2"></span>Loading loans...</div>';
+
+      const loans = await fetchCustomerLoans(activeCustomer.id);
+      if (!loans || loans.length === 0) {
+        container.innerHTML = `
+          <div class="col-12">
+            <div class="card card-custom text-center py-5">
+              <i class="bi bi-wallet2 fs-1 text-muted mb-2"></i>
+              <h5 class="text-secondary">No Loan Applications Found</h5>
+              <p class="text-muted small">You haven't applied for any loans yet.</p>
+              <div>
+                <button class="btn btn-primary btn-sm" onclick="bootstrap.Tab.getInstance(document.getElementById('apply-tab')).show() || new bootstrap.Tab(document.getElementById('apply-tab')).show()">
+                  <i class="bi bi-plus-circle me-1"></i> Apply Now
+                </button>
+              </div>
+            </div>
+          </div>`;
+        return;
+      }
+
+      container.innerHTML = loans.map(loan => {
+        let statusBadge = '';
+        if (loan.status === 'pending') {
+          statusBadge = '<span class="badge-status badge-pending"><i class="bi bi-hourglass-split"></i> Pending Approval</span>';
+        } else if (loan.status === 'approved') {
+          statusBadge = '<span class="badge-status badge-approved"><i class="bi bi-check-circle-fill"></i> Approved</span>';
+        } else {
+          statusBadge = '<span class="badge-status badge-rejected"><i class="bi bi-x-circle-fill"></i> Rejected</span>';
+        }
+
+        const dateStr = new Date(loan.created_at).toLocaleDateString('en-IN');
+
+        return `
+          <div class="col-12 col-md-6 col-lg-4">
+            <div class="card card-custom h-100 p-3">
+              <div class="d-flex justify-content-between align-items-start mb-2">
+                <div>
+                  <small class="text-muted">${dateStr}</small>
+                  <h5 class="fw-bold text-primary mb-0">₹${parseFloat(loan.amount).toLocaleString('en-IN')}</h5>
+                </div>
+                ${statusBadge}
+              </div>
+
+              <div class="small text-muted mb-2">
+                <strong>Purpose:</strong> ${loan.purpose || 'Personal'}
+              </div>
+
+              <div class="bg-light p-2 rounded mb-3 small">
+                <div class="d-flex justify-content-between">
+                  <span>Tenure:</span>
+                  <strong>${loan.tenure_months} Months</strong>
+                </div>
+                <div class="d-flex justify-content-between">
+                  <span>Monthly EMI:</span>
+                  <strong>₹${parseFloat(loan.monthly_emi).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong>
+                </div>
+                <div class="d-flex justify-content-between">
+                  <span>Total Payable:</span>
+                  <strong>₹${parseFloat(loan.total_payable).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong>
+                </div>
+              </div>
+
+              ${loan.remarks ? `
+                <div class="alert alert-light border small py-1 px-2 mb-3">
+                  <i class="bi bi-info-circle me-1"></i><strong>Admin Remarks:</strong> ${loan.remarks}
+                </div>` : ''}
+
+              <div class="mt-auto">
+                ${loan.status === 'approved' ? `
+                  <button class="btn btn-primary btn-sm w-100" onclick="viewRepaymentSchedule('${loan.id}', '${loan.monthly_emi}', '${loan.total_payable}')">
+                    <i class="bi bi-calendar-check me-1"></i> View EMI Schedule & Pay
+                  </button>
+                ` : `
+                  <button class="btn btn-outline-secondary btn-sm w-100" disabled>
+                    ${loan.status === 'pending' ? 'Pending Review' : 'Application Rejected'}
+                  </button>
+                `}
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    /**
+     * Opens modal displaying EMI repayment schedule for an approved loan formatted in Indian Rupees.
+     * @param {string} loanId - Loan UUID
+     * @param {number} monthlyEmi - Monthly EMI
+     * @param {number} totalPayable - Total Payable
+     */
+    async function viewRepaymentSchedule(loanId, monthlyEmi, totalPayable) {
+      document.getElementById('modalLoanId').textContent = loanId;
+      document.getElementById('modalMonthlyEmi').textContent = `₹${parseFloat(monthlyEmi).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+      document.getElementById('modalTotalPayable').textContent = `₹${parseFloat(totalPayable).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+
+      const tbody = document.getElementById('scheduleTableBody');
+      tbody.innerHTML = '<tr><td colspan="5" class="text-center py-3 text-muted"><span class="spinner-border spinner-border-sm me-2"></span>Loading installments...</td></tr>';
+
+      scheduleModalInstance.show();
+
+      const payments = await fetchLoanPayments(loanId);
+      if (!payments || payments.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" class="text-center py-3 text-muted">No schedule generated yet. Please contact admin.</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = payments.map(p => {
+        const overdue = isPaymentOverdue(p.due_date, p.status);
+        let badge = '';
+        let actionBtn = '';
+
+        if (p.status === 'paid') {
+          badge = `<span class="badge-status badge-paid"><i class="bi bi-check-all"></i> Paid on ${new Date(p.paid_at).toLocaleDateString('en-IN')}</span>`;
+          actionBtn = `<span class="text-success small fw-medium"><i class="bi bi-check2-circle"></i> Completed</span>`;
+        } else if (overdue) {
+          badge = `<span class="badge-status badge-overdue"><i class="bi bi-exclamation-diamond-fill"></i> Overdue</span>`;
+          actionBtn = `<button class="btn btn-danger btn-sm" onclick="handlePayInstallment('${p.id}', '${loanId}', '${monthlyEmi}', '${totalPayable}')"><i class="bi bi-credit-card me-1"></i> Pay Now</button>`;
+        } else {
+          badge = `<span class="badge-status badge-pending"><i class="bi bi-clock"></i> Pending</span>`;
+          actionBtn = `<button class="btn btn-outline-primary btn-sm" onclick="handlePayInstallment('${p.id}', '${loanId}', '${monthlyEmi}', '${totalPayable}')"><i class="bi bi-credit-card me-1"></i> Pay</button>`;
+        }
+
+        return `
+          <tr>
+            <td class="ps-3 fw-bold">${p.installment_number}</td>
+            <td>${p.due_date}</td>
+            <td class="fw-semibold">₹${parseFloat(p.amount).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+            <td>${badge}</td>
+            <td class="text-end pe-3">${actionBtn}</td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    /**
+     * Handles paying an individual monthly EMI installment.
+     * @param {string} paymentId - Payment record UUID
+     * @param {string} loanId - Associated Loan UUID
+     * @param {number} monthlyEmi - Monthly EMI
+     * @param {number} totalPayable - Total payable
+     */
+    async function handlePayInstallment(paymentId, loanId, monthlyEmi, totalPayable) {
+      if (!confirm('Confirm payment for this installment?')) return;
+
+      try {
+        await markPaymentAsPaid(paymentId);
+        showNotification('EMI payment successful! Your schedule has been updated.', 'success');
+        await viewRepaymentSchedule(loanId, monthlyEmi, totalPayable);
+      } catch (err) {
+        alert('Payment failed: ' + (err.message || err));
+      }
+    }
+
+    // Handle Profile Form Submission
+    document.getElementById('profileForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const phone = document.getElementById('profilePhone').value.trim();
+      const address = document.getElementById('profileAddress').value.trim();
+      const monthly_income = document.getElementById('profileIncome').value;
+      const employment = document.getElementById('profileEmployment').value;
+
+      const btn = document.getElementById('saveProfileBtn');
+      const spinner = document.getElementById('profileSpinner');
+
+      try {
+        btn.disabled = true;
+        spinner.classList.remove('d-none');
+
+        await updateCustomerProfile(activeCustomer.id, { phone, address, monthly_income, employment });
+        showNotification('Your profile information has been successfully updated!', 'success');
+      } catch (err) {
+        showNotification(err.message || 'Error updating profile', 'danger');
+      } finally {
+        btn.disabled = false;
+        spinner.classList.add('d-none');
+      }
+    });
+
+    // Handle Loan Application Submission
+    document.getElementById('loanForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const amount = parseFloat(document.getElementById('loanAmount').value);
+      const tenure_months = parseInt(document.getElementById('loanTenure').value, 10);
+      const purpose = document.getElementById('loanPurpose').value.trim();
+
+      const btn = document.getElementById('submitLoanBtn');
+      const spinner = document.getElementById('loanSubmitSpinner');
+
+      try {
+        btn.disabled = true;
+        spinner.classList.remove('d-none');
+
+        await submitLoanApplication(activeCustomer.id, { amount, tenure_months, purpose });
+        showNotification('Loan application submitted successfully! Our loan team will review it shortly.', 'success');
+
+        // Reset form & reload loans list
+        document.getElementById('loanForm').reset();
+        updateLiveEMIPreview();
+        await loadLoansList();
+
+        // Switch to My Loans tab
+        const tab = new bootstrap.Tab(document.getElementById('my-loans-tab'));
+        tab.show();
+      } catch (err) {
+        showNotification(err.message || 'Error submitting loan application', 'danger');
+      } finally {
+        btn.disabled = false;
+        spinner.classList.add('d-none');
+      }
+    });
+
+    // Handle Logout
+    document.getElementById('logoutBtn').addEventListener('click', signOutUser);
+
+    window.addEventListener('DOMContentLoaded', initCustomerPortal);
+  </script>
+</body>
+</html>

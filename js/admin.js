@@ -112,7 +112,7 @@ async function fetchAdminMetrics() {
  */
 async function generatePaymentsSchedule(loan) {
   const supabase = getSupabase();
-  if (!supabase) throw new Error('Supabase client not initialized');
+  if (!supabase) throw new Error('Service unavailable. Please try again later.');
 
   const tenure = parseInt(loan.tenure_months, 10);
   const emi = parseFloat(loan.monthly_emi);
@@ -148,7 +148,7 @@ async function generatePaymentsSchedule(loan) {
  */
 async function processLoanDecision(loanId, newStatus, remarks) {
   const supabase = getSupabase();
-  if (!supabase) throw new Error('Supabase client not initialized');
+  if (!supabase) throw new Error('Service unavailable. Please try again later.');
 
   const now = new Date().toISOString();
   const updatePayload = {

@@ -37,7 +37,7 @@ async function loadCustomerProfile(userId) {
  */
 async function updateCustomerProfile(userId, profileData) {
   const supabase = getSupabase();
-  if (!supabase) throw new Error('Supabase client not initialized');
+  if (!supabase) throw new Error('Service unavailable. Please try again later.');
 
   const { data, error } = await supabase
     .from('profiles')
@@ -94,7 +94,7 @@ function updateLiveEMIPreview() {
  */
 async function submitLoanApplication(userId, application) {
   const supabase = getSupabase();
-  if (!supabase) throw new Error('Supabase client not initialized');
+  if (!supabase) throw new Error('Service unavailable. Please try again later.');
 
   const annualRate = 10;
   const emi = calculateMonthlyEMI(application.amount, annualRate, application.tenure_months);
@@ -175,7 +175,7 @@ async function fetchLoanPayments(loanId) {
  */
 async function markPaymentAsPaid(paymentId) {
   const supabase = getSupabase();
-  if (!supabase) throw new Error('Supabase client not initialized');
+  if (!supabase) throw new Error('Service unavailable. Please try again later.');
 
   const { data, error } = await supabase
     .from('payments')

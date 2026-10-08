@@ -8,7 +8,7 @@ A clean, beginner-friendly Loan Management System web application built with **p
 
 ```text
 Loan MG/
-├── index.html            # Landing page: Login, Borrower Registration & Supabase Setup
+├── index.html            # Landing page: Login & Borrower Registration
 ├── customer.html         # Borrower Portal: Profile, Apply for Loan, EMI Schedule & Pay
 ├── admin.html            # Admin Console: Portfolio KPIs (₹), Chart.js Analytics, Decision Queue
 ├── schema.sql            # Supabase database schema, RLS policies, trigger & seed function
@@ -38,15 +38,15 @@ Loan MG/
 
 ---
 
-### Step 2: Configure Supabase Credentials
-Your credentials have already been configured in [`js/supabaseClient.js`](js/supabaseClient.js):
+### Step 2: Supabase Credentials
+Your credentials are configured directly in [`js/supabaseClient.js`](js/supabaseClient.js):
 ```javascript
 const SUPABASE_CONFIG = {
-  url: window.SUPABASE_URL || 'https://mgsnboigqmuzrykeahff.supabase.co',
-  anonKey: window.SUPABASE_ANON_KEY || 'sb_publishable_l-Bmlr8QC8VclhL98Ay5yQ_Mn8YQ8fR'
+  url: 'https://mgsnboigqmuzrykeahff.supabase.co',
+  anonKey: 'sb_publishable_l-Bmlr8QC8VclhL98Ay5yQ_Mn8YQ8fR'
 };
 ```
-*(You can also update them in the browser anytime via the "Supabase Setup" button on `index.html`).*
+*(The web application connects directly using these credentials).*
 
 ---
 

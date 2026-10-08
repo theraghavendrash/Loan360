@@ -311,6 +311,11 @@
      */
     async function initCustomerPortal() {
       scheduleModalInstance = new bootstrap.Modal(document.getElementById('scheduleModal'));
+      const client = getSupabase();
+      if (!client) {
+        showNotification('Service unavailable. Please try again later.', 'danger');
+        return;
+      }
       const authData = await requireAuth('customer');
       if (!authData) return;
 

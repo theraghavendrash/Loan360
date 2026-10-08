@@ -16,7 +16,7 @@
  */
 async function signUpUser(email, password, fullName) {
   const supabase = getSupabase();
-  if (!supabase) throw new Error('Supabase client is not configured yet.');
+  if (!supabase) throw new Error('Service unavailable. Please try again later.');
 
   const { data, error } = await supabase.auth.signUp({
     email,
@@ -41,7 +41,7 @@ async function signUpUser(email, password, fullName) {
  */
 async function signInUser(email, password) {
   const supabase = getSupabase();
-  if (!supabase) throw new Error('Supabase client is not configured yet.');
+  if (!supabase) throw new Error('Service unavailable. Please try again later.');
 
   const { data, error } = await supabase.auth.signInWithPassword({
     email,

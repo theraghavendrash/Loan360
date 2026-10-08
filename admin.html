@@ -288,7 +288,11 @@
     async function initAdminPortal() {
       decisionModalInstance = new bootstrap.Modal(document.getElementById('decisionModal'));
       applicantModalInstance = new bootstrap.Modal(document.getElementById('applicantDetailsModal'));
-
+      const client = getSupabase();
+      if (!client) {
+        showNotification('Service unavailable. Please try again later.', 'danger');
+        return;
+      }
       const authData = await requireAuth('admin');
       if (!authData) return;
 

@@ -22,9 +22,6 @@
         <span class="brand-icon"><i class="bi bi-bank2"></i></span>
         <span>Loan 360 <small class="text-secondary fw-normal fs-6">| Loan System</small></span>
       </a>
-      <button class="btn btn-outline-light btn-sm" data-bs-toggle="modal" data-bs-target="#configModal">
-        <i class="bi bi-gear-fill me-1"></i> Supabase Setup
-      </button>
     </div>
   </nav>
 
@@ -33,13 +30,6 @@
     <div class="row justify-content-center">
       <div class="col-12 col-md-8 col-lg-5">
 
-        <!-- Supabase Configuration Warning Banner (if keys not set) -->
-        <div id="configAlert" class="alert alert-warning d-none" role="alert">
-          <i class="bi bi-exclamation-triangle-fill me-2"></i>
-          <strong>Supabase not configured!</strong>
-          <a href="#" class="alert-link" data-bs-toggle="modal" data-bs-target="#configModal">Click here</a>
-          to set your Project URL & Anon Key, or edit <code>js/supabaseClient.js</code>.
-        </div>
 
         <!-- Notification Message Banner -->
         <div id="authAlert" class="alert d-none" role="alert"></div>
@@ -143,35 +133,6 @@
     <span>Loan 360 &copy; 2026. All rights reserved.</span>
   </footer>
 
-  <!-- SUPABASE CONFIGURATION MODAL -->
-  <div class="modal fade" id="configModal" tabindex="-1" aria-labelledby="configModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="configModalLabel"><i class="bi bi-sliders me-2"></i>Supabase Configuration</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body">
-          <p class="text-muted small">
-            Paste your Project URL and Anon Public Key from your Supabase Dashboard 
-            (<strong>Settings &gt; API</strong>). You can also edit <code>js/supabaseClient.js</code> directly.
-          </p>
-          <div class="mb-3">
-            <label for="modalSupabaseUrl" class="form-label fw-medium">Supabase Project URL</label>
-            <input type="url" class="form-control" id="modalSupabaseUrl" placeholder="https://yourproject.supabase.co">
-          </div>
-          <div class="mb-3">
-            <label for="modalSupabaseKey" class="form-label fw-medium">Supabase Anon Public Key</label>
-            <textarea class="form-control font-monospace small" id="modalSupabaseKey" rows="3" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."></textarea>
-          </div>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-          <button type="button" class="btn btn-primary" id="saveConfigBtn">Save & Apply</button>
-        </div>
-      </div>
-    </div>
-  </div>
 
   <!-- Scripts -->
   <!-- Supabase JS CDN -->
@@ -202,43 +163,22 @@
       // Check if Supabase client is initialized
       const client = getSupabase();
       if (!client) {
-        document.getElementById('configAlert').classList.remove('d-none');
-      } else {
-        document.getElementById('configAlert').classList.add('d-none');
-        // Check if user is already logged in
-        try {
-          const user = await getCurrentUser();
-          if (user) {
-            const profile = await getUserProfile(user.id);
-            const role = profile ? profile.role : (user.user_metadata?.role || 'customer');
-            redirectByRole(role);
-          }
-        } catch (err) {
-          console.warn('Session check note:', err);
-        }
-      }
-
-      // Populate config modal with existing or hardcoded values
-      const storedUrl = localStorage.getItem('loan_mg_supabase_url') || SUPABASE_CONFIG.url;
-      const storedKey = localStorage.getItem('loan_mg_supabase_anon_key') || SUPABASE_CONFIG.anonKey;
-      document.getElementById('modalSupabaseUrl').value = storedUrl;
-      document.getElementById('modalSupabaseKey').value = storedKey;
-    }
-
-    // Handle Config Save
-    document.getElementById('saveConfigBtn').addEventListener('click', () => {
-      const url = document.getElementById('modalSupabaseUrl').value.trim();
-      const key = document.getElementById('modalSupabaseKey').value.trim();
-      if (!url || !key) {
-        alert('Please provide both Project URL and Anon Key');
+        showAlert('Service unavailable. Please try again later.', 'danger');
         return;
       }
-      saveSupabaseConfig(url, key);
-      const modal = bootstrap.Modal.getInstance(document.getElementById('configModal'));
-      if (modal) modal.hide();
-      showAlert('Supabase settings saved! Reloading...', 'success');
-      setTimeout(() => window.location.reload(), 1000);
-    });
+
+      // Check if user is already logged in
+      try {
+        const user = await getCurrentUser();
+        if (user) {
+          const profile = await getUserProfile(user.id);
+          const role = profile ? profile.role : (user.user_metadata?.role || 'customer');
+          redirectByRole(role);
+        }
+      } catch (err) {
+        console.warn('Session check note:', err);
+      }
+    }
 
     // Handle Sign In Submission
     document.getElementById('loginForm').addEventListener('submit', async (e) => {

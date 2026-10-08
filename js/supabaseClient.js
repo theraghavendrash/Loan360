@@ -20,8 +20,9 @@ let supabaseClient = null;
 
 /**
  * Initializes and returns the shared Supabase client instance.
- * Prioritizes custom localStorage overrides if present, otherwise defaults
- * directly to the hardcoded SUPABASE_CONFIG credentials.
+ * Prioritizes custom localStorage overrides if valid, otherwise defaults
+ * directly to the hardcoded SUPABASE_CONFIG credentials. Clears any stale or
+ * corrupted placeholder values from localStorage.
  * @returns {object|null} The initialized Supabase client, or null if keys are missing.
  */
 function getSupabase() {
@@ -29,27 +30,58 @@ function getSupabase() {
     return supabaseClient;
   }
 
-  // Use localStorage if custom keys were saved in the browser modal, otherwise fallback to hardcoded keys
-  const storedUrl = localStorage.getItem('loan_mg_supabase_url');
-  const storedKey = localStorage.getItem('loan_mg_supabase_anon_key');
+  try {
+    let finalUrl = SUPABASE_CONFIG.url;
+    let finalKey = SUPABASE_CONFIG.anonKey;
 
-  const finalUrl = (storedUrl && storedUrl.trim()) || SUPABASE_CONFIG.url;
-  const finalKey = (storedKey && storedKey.trim()) || SUPABASE_CONFIG.anonKey;
+    // Read localStorage overrides, while ignoring corruptions / placeholder strings
+    const storedUrl = localStorage.getItem('loan_mg_supabase_url');
+    const storedKey = localStorage.getItem('loan_mg_supabase_anon_key');
 
-  // Validate that required credentials exist
-  if (!finalUrl || !finalKey) {
-    console.warn('Supabase credentials have not been configured yet.');
+    if (
+      storedUrl && 
+      storedUrl.trim() && 
+      !storedUrl.includes('YOUR_SUPABASE') && 
+      storedUrl !== 'undefined' && 
+      storedUrl !== 'null'
+    ) {
+      finalUrl = storedUrl.trim();
+    } else if (storedUrl) {
+      // Clear corrupt or placeholder entry
+      localStorage.removeItem('loan_mg_supabase_url');
+    }
+
+    if (
+      storedKey && 
+      storedKey.trim() && 
+      !storedKey.includes('YOUR_SUPABASE') && 
+      storedKey !== 'undefined' && 
+      storedKey !== 'null'
+    ) {
+      finalKey = storedKey.trim();
+    } else if (storedKey) {
+      // Clear corrupt or placeholder entry
+      localStorage.removeItem('loan_mg_supabase_anon_key');
+    }
+
+    // Validate that required credentials exist
+    if (!finalUrl || !finalKey) {
+      console.warn('Supabase credentials have not been configured yet.');
+      return null;
+    }
+
+    // Check if the Supabase script was loaded from CDN
+    if (typeof window.supabase === 'undefined' || typeof window.supabase.createClient !== 'function') {
+      console.error('Supabase CDN library is not loaded on the page.');
+      return null;
+    }
+
+    supabaseClient = window.supabase.createClient(finalUrl, finalKey);
+    return supabaseClient;
+  } catch (err) {
+    console.error('Failed to initialize Supabase client:', err);
     return null;
   }
-
-  // Check if the Supabase script was loaded from CDN
-  if (typeof window.supabase === 'undefined') {
-    console.error('Supabase CDN library is not loaded on the page.');
-    return null;
-  }
-
-  supabaseClient = window.supabase.createClient(finalUrl, finalKey);
-  return supabaseClient;
 }
 
 /**
